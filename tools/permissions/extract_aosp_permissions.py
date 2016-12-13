@@ -27,6 +27,7 @@ import re
 import codecs
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
+from androguard.util import getxml_value, NS_ANDROID_URI
 
 
 PATH_TO_AOSP_ROOT = ""  # path to AOSP folder
@@ -45,7 +46,6 @@ PLATFORM_VERSION_PATTERN = re.compile(
 ANDROID_MANIFEST_NAME = "AndroidManifest.xml"
 STRINGS_REL_PATH = "res/values/strings.xml"
 PLATFORM_VERSIONS_FILE_REL_PATH = "build/core/version_defaults.mk"
-NS_ANDROID_URI = "http://schemas.android.com/apk/res/android"
 
 AOSP_PERMISSIONS_PARAM_NAME = "AOSP_PERMISSIONS"
 AOSP_PERMISSION_GROUPS_PARAM_NAME = "AOSP_PERMISSION_GROUPS"
@@ -122,18 +122,17 @@ def get_permission_details(manifest_dir):
             manifest_document = minidom.parseString(xml_string)
 
     for i in manifest_document.getElementsByTagName("permission"):
-        name = i.getAttributeNS(NS_ANDROID_URI, "name")
-        protection_level = i.getAttributeNS(NS_ANDROID_URI, "protectionLevel")
-        permission_group = i.getAttributeNS(NS_ANDROID_URI, "permissionGroup")
+        name = getxml_value(i, "name")
+        protection_level = getxml_value(i, "protectionLevel")
+        permission_group = getxml_value(i, "permissionGroup")
 
         label = ""
-        label_string_id = i.getAttributeNS(NS_ANDROID_URI, "label")[8:]
+        label_string_id = getxml_value(i, "label")[8:]
         if label_string_id != "":
             label = dstrings.get(label_string_id, "")
 
         description = ""
-        description_string_id = i.getAttributeNS(
-            NS_ANDROID_URI, "description")[8:]
+        description_string_id = getxml_value(i, "description")[8:]
         if description_string_id != "":
             description = dstrings.get(description_string_id, "")
 
@@ -146,16 +145,15 @@ def get_permission_details(manifest_dir):
 
     # getting permission groups
     for i in manifest_document.getElementsByTagName("permission-group"):
-        name = i.getAttributeNS(NS_ANDROID_URI, "name")
+        name = getxml_value(i, "name")
 
         label = ""
-        label_string_id = i.getAttributeNS(NS_ANDROID_URI, "label")[8:]
+        label_string_id = getxml_value(i, "label")[8:]
         if label_string_id != "":
             label = dstrings.get(label_string_id, "")
 
         description = ""
-        description_string_id = i.getAttributeNS(
-            NS_ANDROID_URI, "description")[8:]
+        description_string_id = getxml_value(i, "description")[8:]
         if description_string_id != "":
             description = dstrings.get(description_string_id, "")
 

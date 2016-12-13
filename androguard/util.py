@@ -15,6 +15,22 @@
 # limitations under the License.
 
 
+NS_ANDROID_URI = 'http://schemas.android.com/apk/res/android'
+
+
 def read(filename, binary=True):
     with open(filename, 'rb' if binary else 'r') as f:
         return f.read()
+
+
+def is_str(item, string=False):
+    if string:
+        return str(item)
+    return item
+
+
+def getxml_value(item, attribute, string=False):
+    name = is_str(item.getAttributeNS(NS_ANDROID_URI, attribute), string)
+    if not name:
+        name = is_str(item.getAttribute("android:" + attribute), string)
+    return name
