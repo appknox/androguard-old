@@ -19,7 +19,7 @@
 from androguard.core import bytecode
 from androguard.core import androconf
 from androguard.core.bytecodes.dvm_permissions import DVM_PERMISSIONS
-from androguard.util import read
+from androguard.util import read, getxml_value
 
 from androguard.core.resources import public
 
@@ -40,8 +40,6 @@ def parse_lxml_dom(tree):
     lxml.sax.saxify(tree, handler)
     return handler.document
 
-
-NS_ANDROID_URI = 'http://schemas.android.com/apk/res/android'
 
 # 0: chilkat
 # 1: default python zipfile module
@@ -216,26 +214,25 @@ class APK(object):
                 break
             self.package = self.xml[
                 i].documentElement.getAttribute("package")
-            self.androidversion["Code"] = self.xml[
-                i].documentElement.getAttributeNS(NS_ANDROID_URI, "versionCode")
-            self.androidversion["Name"] = self.xml[
-                i].documentElement.getAttributeNS(NS_ANDROID_URI, "versionName")
+            self.androidversion["Code"] = getxml_value(
+                self.xml[i].documentElement, "versionCode")
+            self.androidversion["Name"] = getxml_value(
+                self.xml[i].documentElement, "versionName")
             for item in self.xml[i].getElementsByTagName('uses-permission'):
-                self.permissions.append(
-                    str(item.getAttributeNS(NS_ANDROID_URI, "name")))
+                self.permissions.append(getxml_value(item, "name", string=True))
 
             # getting details of the declared permissions
             for d_perm_item in self.xml[i].getElementsByTagName('permission'):
                 d_perm_name = self._get_res_string_value(
-                    str(d_perm_item.getAttributeNS(NS_ANDROID_URI, "name")))
-                d_perm_label = self._get_res_string_value(
-                    str(d_perm_item.getAttributeNS(NS_ANDROID_URI, "label")))
-                d_perm_description = self._get_res_string_value(
-                    str(d_perm_item.getAttributeNS(NS_ANDROID_URI, "description")))
-                d_perm_permissionGroup = self._get_res_string_value(
-                    str(d_perm_item.getAttributeNS(NS_ANDROID_URI, "permissionGroup")))
-                d_perm_protectionLevel = self._get_res_string_value(
-                    str(d_perm_item.getAttributeNS(NS_ANDROID_URI, "protectionLevel")))
+                    getxml_value(d_perm_item, "name", string=True))
+                d_perm_label=self._get_res_string_value(
+                    getxml_value(d_perm_item, "label", string=True))
+                d_perm_description=self._get_res_string_value(
+                    getxml_value(d_perm_item, "description", string=True))
+                d_perm_permissionGroup=self._get_res_string_value(
+                    getxml_value(d_perm_item, "permissionGroup", string=True))
+                d_perm_protectionLevel=self._get_res_string_value(
+                    getxml_value(d_perm_item, "protectionLevel", string=True))
 
                 d_perm_details = {
                     "label": d_perm_label,
@@ -460,7 +457,7 @@ class APK(object):
         l = []
         for i in self.xml:
             for item in self.xml[i].getElementsByTagName(tag_name):
-                value = item.getAttributeNS(NS_ANDROID_URI, attribute)
+                value = getxml_value(item, attribute)
                 value = self.format_value(value)
 
                 l.append(str(value))
@@ -491,7 +488,7 @@ class APK(object):
         """
         for i in self.xml:
             for item in self.xml[i].getElementsByTagName(tag_name):
-                value = item.getAttributeNS(NS_ANDROID_URI, attribute)
+                value = getxml_value(item, attribute)
 
                 if len(value) > 0:
                     return value
@@ -509,14 +506,14 @@ class APK(object):
         for i in self.xml:
             for item in self.xml[i].getElementsByTagName("activity"):
                 for sitem in item.getElementsByTagName("action"):
-                    val = sitem.getAttributeNS(NS_ANDROID_URI, "name")
+                    val = getxml_value(sitem, "name")
                     if val == "android.intent.action.MAIN":
-                        x.add(item.getAttributeNS(NS_ANDROID_URI, "name"))
+                        x.add(getxml_value(item, "name"))
 
                 for sitem in item.getElementsByTagName("category"):
-                    val = sitem.getAttributeNS(NS_ANDROID_URI, "name")
+                    val = getxml_value(sitem, "name")
                     if val == "android.intent.category.LAUNCHER":
-                        y.add(item.getAttributeNS(NS_ANDROID_URI, "name"))
+                        y.add(getxml_value(item, "name"))
 
         z = x.intersection(y)
         if len(z) > 0:
@@ -563,16 +560,16 @@ class APK(object):
 
         for i in self.xml:
             for item in self.xml[i].getElementsByTagName(category):
-                if self.format_value(item.getAttributeNS(NS_ANDROID_URI, "name")) == name:
+                if self.format_value(getxml_value(item, "name")) == name:
                     for sitem in item.getElementsByTagName("intent-filter"):
                         for ssitem in sitem.getElementsByTagName("action"):
-                            if ssitem.getAttributeNS(NS_ANDROID_URI, "name") not in d["action"]:
+                            if getxml_value(ssitem, "name") not in d["action"]:
                                 d["action"].append(
-                                    ssitem.getAttributeNS(NS_ANDROID_URI, "name"))
+                                    getxml_value(ssitem, "name"))
                         for ssitem in sitem.getElementsByTagName("category"):
-                            if ssitem.getAttributeNS(NS_ANDROID_URI, "name") not in d["category"]:
+                            if getxml_value(ssitem, "name") not in d["category"]:
                                 d["category"].append(
-                                    ssitem.getAttributeNS(NS_ANDROID_URI, "name"))
+                                    getxml_value(ssitem, "name"))
 
         if not d["action"]:
             del d["action"]
