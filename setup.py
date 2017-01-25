@@ -42,7 +42,6 @@ setup(
         'androdd.py', 'androgui.py',
     ],
     install_requires=[
-        'distribute',
         'networkx',
         'lxml',
     ],
