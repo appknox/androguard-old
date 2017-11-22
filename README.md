@@ -1,5 +1,7 @@
 # Androguard
 
+# THIS IS DEPRECATED. PLEASE USE THE OFFICIAL ANDROGUARD at [androguard/androguard](https://github.zom/androguard/androguard)
+
 ## Features
 
 Androguard is a full python tool to play with Android files.
